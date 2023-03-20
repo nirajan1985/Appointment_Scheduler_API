@@ -7,7 +7,7 @@ namespace AppointmentSchedulerAPI.Controllers
 {
     [Route("api/Appointment")]
     [ApiController]
-    public class AppointmentController:ControllerBase
+    public class AppointmentController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
         public AppointmentController(ApplicationDbContext db)
@@ -21,20 +21,20 @@ namespace AppointmentSchedulerAPI.Controllers
         {
             return Ok(_db.Appointments.ToList());
         }
-        
-        [HttpGet("{id:int}",Name ="GetAppointment")]
+
+        [HttpGet("{id:int}", Name = "GetAppointment")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<AppointmentDTO> GetAppointment(int id)
         {
-            if(id== 0) 
+            if (id == 0)
             {
                 return BadRequest();
             }
-            var appointment= _db.Appointments.FirstOrDefault(u=>u.Id==id);
+            var appointment = _db.Appointments.FirstOrDefault(u => u.Id == id);
 
-            if(appointment== null)
+            if (appointment == null)
             {
                 return NotFound();
             }
@@ -43,21 +43,21 @@ namespace AppointmentSchedulerAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status201Created)] 
-        public ActionResult<AppointmentDTO> CreateAppointment([FromBody]AppointmentDTO appointmentDTO)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public ActionResult<AppointmentDTO> CreateAppointment([FromBody] AppointmentDTO appointmentDTO)
         {
-            if (_db.Appointments.FirstOrDefault(u => u.Title.ToLower() == appointmentDTO.Title.ToLower())!=null) 
+            if (_db.Appointments.FirstOrDefault(u => u.Title.ToLower() == appointmentDTO.Title.ToLower()) != null)
             {
                 ModelState.AddModelError("CustomError", "Appointment already exists !");
                 return BadRequest(ModelState);
             }
-           
-            
-            if(appointmentDTO==null)
+
+
+            if (appointmentDTO == null)
             {
                 return BadRequest();
             }
-            if(appointmentDTO.Id>0) 
+            if (appointmentDTO.Id > 0)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
@@ -66,28 +66,28 @@ namespace AppointmentSchedulerAPI.Controllers
             {
                 Id = appointmentDTO.Id,
                 Title = appointmentDTO.Title,
-                AppointmentDate= appointmentDTO.AppointmentDate,
-                Reminder=appointmentDTO.Reminder,
+                AppointmentDate = appointmentDTO.AppointmentDate,
+                Reminder = appointmentDTO.Reminder,
 
             };
 
             _db.Appointments.Add(model);
             _db.SaveChanges();
-            
+
             //return Ok(appointmentDTO);
-            return CreatedAtRoute("GetAppointment",new{id=appointmentDTO.Id },appointmentDTO);
+            return CreatedAtRoute("GetAppointment", new { id = appointmentDTO.Id }, appointmentDTO);
         }
-        [HttpDelete ("{id:int}",Name ="DeleteAppointment")]
+        [HttpDelete("{id:int}", Name = "DeleteAppointment")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult DeleteAppointment(int id)
         {
-            if(id==0)
+            if (id == 0)
             {
                 return BadRequest();
             }
-            var appointment= _db.Appointments.FirstOrDefault(u=>u.Id==id);
+            var appointment = _db.Appointments.FirstOrDefault(u => u.Id == id);
             if (appointment == null)
             {
                 return NotFound();
@@ -97,6 +97,23 @@ namespace AppointmentSchedulerAPI.Controllers
             _db.SaveChanges();
             return NoContent();
         }
+        [HttpPut("{id:int}", Name = "UpdateAppointment")]
 
+        public IActionResult UpdateAppointment(int id,[FromBody]AppointmentDTO appointmentDTO)
+        {
+           
+
+            Appointment model= new Appointment()
+            {
+                Id = appointmentDTO.Id,
+                Title= appointmentDTO.Title,
+                AppointmentDate= appointmentDTO.AppointmentDate,
+                Reminder= appointmentDTO.Reminder,
+            };
+            _db.Appointments.Update(model);
+            _db.SaveChanges();
+            
+            return NoContent();
+        }
     }
 }
