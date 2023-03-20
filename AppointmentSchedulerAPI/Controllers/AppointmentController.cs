@@ -1,7 +1,9 @@
 ﻿using AppointmentSchedulerAPI.Data;
 using AppointmentSchedulerAPI.Models;
 using AppointmentSchedulerAPI.Models.Dto;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppointmentSchedulerAPI.Controllers
 {
@@ -98,9 +100,15 @@ namespace AppointmentSchedulerAPI.Controllers
             return NoContent();
         }
         [HttpPut("{id:int}", Name = "UpdateAppointment")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
 
         public IActionResult UpdateAppointment(int id,[FromBody]AppointmentDTO appointmentDTO)
         {
+            if(appointmentDTO==null || id!=appointmentDTO.Id)
+            {
+                return BadRequest();
+            }
            
 
             Appointment model= new Appointment()
@@ -113,6 +121,41 @@ namespace AppointmentSchedulerAPI.Controllers
             _db.Appointments.Update(model);
             _db.SaveChanges();
             
+            return NoContent();
+        }
+        [HttpPatch("{id:int}",Name="UpdatePartialAppointment")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+
+
+        public IActionResult UpdatePartialAppointment(int id,JsonPatchDocument<AppointmentDTO> patchDTO)
+        {
+            if(patchDTO==null || id==0)
+            {
+                return BadRequest();
+            }
+            var appointment=_db.Appointments.AsNoTracking().FirstOrDefault(u=>u.Id==id);
+           
+            AppointmentDTO appointmentDTO = new()
+            {
+               
+                Id=appointment.Id,
+                Title= appointment.Title,
+                AppointmentDate= appointment.AppointmentDate,
+                Reminder= appointment.Reminder,
+            };
+            patchDTO.ApplyTo(appointmentDTO, ModelState);
+
+            Appointment model = new()
+            {
+                Id=appointmentDTO.Id,
+                Title= appointmentDTO.Title,
+                AppointmentDate= appointmentDTO.AppointmentDate,
+                Reminder= appointmentDTO.Reminder,
+            };
+            _db.Appointments.Update(model);
+            _db.SaveChanges();
+
             return NoContent();
         }
     }
