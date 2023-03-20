@@ -46,7 +46,7 @@ namespace AppointmentSchedulerAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)] 
         public ActionResult<AppointmentDTO> CreateAppointment([FromBody]AppointmentDTO appointmentDTO)
         {
-            if (_db.Appointments.FirstOrDefault(u => u.Title.ToLower() == appointmentDTO.Title.ToLower()) !=null) 
+            if (_db.Appointments.FirstOrDefault(u => u.Title.ToLower() == appointmentDTO.Title.ToLower())!=null) 
             {
                 ModelState.AddModelError("CustomError", "Appointment already exists !");
                 return BadRequest(ModelState);
@@ -76,6 +76,26 @@ namespace AppointmentSchedulerAPI.Controllers
             
             //return Ok(appointmentDTO);
             return CreatedAtRoute("GetAppointment",new{id=appointmentDTO.Id },appointmentDTO);
+        }
+        [HttpDelete ("{id:int}",Name ="DeleteAppointment")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult DeleteAppointment(int id)
+        {
+            if(id==0)
+            {
+                return BadRequest();
+            }
+            var appointment= _db.Appointments.FirstOrDefault(u=>u.Id==id);
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
+            _db.Appointments.Remove(appointment);
+            _db.SaveChanges();
+            return NoContent();
         }
 
     }
