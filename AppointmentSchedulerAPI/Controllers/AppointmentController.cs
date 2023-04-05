@@ -46,7 +46,7 @@ namespace AppointmentSchedulerAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public ActionResult<AppointmentDTO> CreateAppointment([FromBody] AppointmentDTO appointmentDTO)
+        public ActionResult<AppointmentDTO> CreateAppointment([FromBody] AppointmentCreateDTO appointmentDTO)
         {
             if (_db.Appointments.FirstOrDefault(u => u.Title.ToLower() == appointmentDTO.Title.ToLower()) != null)
             {
@@ -59,14 +59,11 @@ namespace AppointmentSchedulerAPI.Controllers
             {
                 return BadRequest();
             }
-            if (appointmentDTO.Id > 0)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            
 
             Appointment model = new()
             {
-                Id = appointmentDTO.Id,
+                
                 Title = appointmentDTO.Title,
                 AppointmentDate = appointmentDTO.AppointmentDate,
                 Reminder = appointmentDTO.Reminder,
@@ -77,7 +74,7 @@ namespace AppointmentSchedulerAPI.Controllers
             _db.SaveChanges();
 
             //return Ok(appointmentDTO);
-            return CreatedAtRoute("GetAppointment", new { id = appointmentDTO.Id }, appointmentDTO);
+            return CreatedAtRoute("GetAppointment", new { id = model.Id }, model);
         }
         [HttpDelete("{id:int}", Name = "DeleteAppointment")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -103,7 +100,7 @@ namespace AppointmentSchedulerAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
 
-        public IActionResult UpdateAppointment(int id,[FromBody]AppointmentDTO appointmentDTO)
+        public IActionResult UpdateAppointment(int id,[FromBody]AppointmentUpdateDTO appointmentDTO)
         {
             if(appointmentDTO==null || id!=appointmentDTO.Id)
             {
@@ -128,7 +125,7 @@ namespace AppointmentSchedulerAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
 
 
-        public IActionResult UpdatePartialAppointment(int id,JsonPatchDocument<AppointmentDTO> patchDTO)
+        public IActionResult UpdatePartialAppointment(int id,JsonPatchDocument<AppointmentUpdateDTO> patchDTO)
         {
             if(patchDTO==null || id==0)
             {
@@ -136,7 +133,7 @@ namespace AppointmentSchedulerAPI.Controllers
             }
             var appointment=_db.Appointments.AsNoTracking().FirstOrDefault(u=>u.Id==id);
            
-            AppointmentDTO appointmentDTO = new()
+            AppointmentUpdateDTO appointmentDTO = new()
             {
                
                 Id=appointment.Id,
