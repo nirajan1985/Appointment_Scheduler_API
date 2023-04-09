@@ -1,6 +1,7 @@
 ﻿using AppointmentSchedulerAPI.Data;
 using AppointmentSchedulerAPI.Models;
 using AppointmentSchedulerAPI.Models.Dto;
+using AppointmentSchedulerAPI.Repository.IRepository;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,11 @@ namespace AppointmentSchedulerAPI.Controllers
     [ApiController]
     public class AppointmentController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IAppointmentRepository _dbAppointment;
         private readonly IMapper _mapper;
-        public AppointmentController(ApplicationDbContext db,IMapper mapper)
+        public AppointmentController(IAppointmentRepository dbAppointment,IMapper mapper)
         {
-            _db = db;
+            _dbAppointment= dbAppointment;
             _mapper = mapper;
         }
 
@@ -24,7 +25,7 @@ namespace AppointmentSchedulerAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointments()
         {
-            IEnumerable<Appointment> appointmentList=await _db.Appointments.ToListAsync();
+            IEnumerable<Appointment> appointmentList=await _dbAppointment.GetAllAsync();
             return Ok(_mapper.Map<List<AppointmentDTO>>(appointmentList));
         }
 
@@ -38,7 +39,7 @@ namespace AppointmentSchedulerAPI.Controllers
             {
                 return BadRequest();
             }
-            var appointment =await _db.Appointments.FirstOrDefaultAsync(u => u.Id == id);
+            var appointment =await _dbAppointment.GetAsync(u => u.Id == id);
 
             if (appointment == null)
             {
@@ -52,7 +53,7 @@ namespace AppointmentSchedulerAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task< ActionResult<AppointmentDTO>> CreateAppointment([FromBody] AppointmentCreateDTO createDTO)
         {
-            if (await _db.Appointments.FirstOrDefaultAsync(u => u.Title.ToLower() == createDTO.Title.ToLower()) != null)
+            if (await _dbAppointment.GetAsync(u => u.Title.ToLower() == createDTO.Title.ToLower()) != null)
             {
                 ModelState.AddModelError("CustomError", "Appointment already exists !");
                 return BadRequest(ModelState);
@@ -68,10 +69,8 @@ namespace AppointmentSchedulerAPI.Controllers
             Appointment model=_mapper.Map<Appointment>(createDTO);
            
 
-            await _db.Appointments.AddAsync(model);
-            await _db.SaveChangesAsync();
+            await _dbAppointment.CreateAsync(model);
 
-            
             return CreatedAtRoute("GetAppointment", new { id = model.Id }, model);
         }
         [HttpDelete("{id:int}", Name = "DeleteAppointment")]
@@ -84,14 +83,14 @@ namespace AppointmentSchedulerAPI.Controllers
             {
                 return BadRequest();
             }
-            var appointment = await _db.Appointments.FirstOrDefaultAsync(u => u.Id == id);
+            var appointment = await _dbAppointment.GetAsync(u => u.Id == id);
             if (appointment == null)
             {
                 return NotFound();
             }
 
-            _db.Appointments.Remove(appointment);
-            await _db.SaveChangesAsync();
+            await _dbAppointment.RemoveAsync(appointment);
+            
             return NoContent();
         }
         [HttpPut("{id:int}", Name = "UpdateAppointment")]
@@ -107,8 +106,8 @@ namespace AppointmentSchedulerAPI.Controllers
 
             Appointment model = _mapper.Map<Appointment>(updateDTO);
             
-            _db.Appointments.Update(model);
-            await _db.SaveChangesAsync();
+            await _dbAppointment.UpdateAsync(model);
+            
             
             return NoContent();
         }
@@ -123,7 +122,7 @@ namespace AppointmentSchedulerAPI.Controllers
             {
                 return BadRequest();
             }
-            var appointment=await _db.Appointments.AsNoTracking().FirstOrDefaultAsync(u=>u.Id==id);
+            var appointment=await _dbAppointment.GetAsync(u=>u.Id==id,tracked:false);
 
             AppointmentUpdateDTO appointmentDTO=_mapper.Map<AppointmentUpdateDTO>(appointment);
            
@@ -132,8 +131,8 @@ namespace AppointmentSchedulerAPI.Controllers
 
             Appointment model = _mapper.Map<Appointment>(appointmentDTO);
             
-            _db.Appointments.Update(model);
-            await _db.SaveChangesAsync();
+            await _dbAppointment.UpdateAsync(model);
+            
 
             return NoContent();
         }

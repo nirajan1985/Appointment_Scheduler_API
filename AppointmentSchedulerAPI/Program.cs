@@ -1,5 +1,7 @@
 using AppointmentSchedulerAPI;
 using AppointmentSchedulerAPI.Data;
+using AppointmentSchedulerAPI.Repository;
+using AppointmentSchedulerAPI.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddScoped<IAppointmentRepository,AppointmentRepository>();
 
 var app = builder.Build();
 
