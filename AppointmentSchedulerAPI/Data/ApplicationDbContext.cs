@@ -10,6 +10,7 @@ namespace AppointmentSchedulerAPI.Data
 
         }
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<AppointmentCategory> AppointmentCategeroies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

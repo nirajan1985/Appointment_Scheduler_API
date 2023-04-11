@@ -18,6 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<IAppointmentRepository,AppointmentRepository>();
+builder.Services.AddScoped<IAppointmentCategoryRepository,AppointmentCategoryRepository>();
 
 var app = builder.Build();
 

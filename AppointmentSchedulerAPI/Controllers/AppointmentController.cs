@@ -28,9 +28,10 @@ namespace AppointmentSchedulerAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetAppointments()
         {
-            IEnumerable<Appointment> appointmentList=await _dbAppointment.GetAllAsync();
+            
             try
             {
+                IEnumerable<Appointment> appointmentList = await _dbAppointment.GetAllAsync();
                 _response.Result = _mapper.Map<List<AppointmentDTO>>(appointmentList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
