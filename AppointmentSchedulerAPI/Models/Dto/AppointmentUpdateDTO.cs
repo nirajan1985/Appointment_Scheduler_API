@@ -6,7 +6,9 @@ namespace AppointmentSchedulerAPI.Models.Dto
     {
         [Required]
         public int Id { get; set; }
-       
+        [Required]
+        public int CategoryNo { get; set; }
+
         [Required]
         public string Title { get; set; }
         public DateTime AppointmentDate { get; set; }

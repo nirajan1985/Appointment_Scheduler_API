@@ -4,6 +4,7 @@ using AppointmentSchedulerAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppointmentSchedulerAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230413202344_AddNewTable")]
+    partial class AddNewTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,10 +28,7 @@ namespace AppointmentSchedulerAPI.Migrations
             modelBuilder.Entity("AppointmentSchedulerAPI.Models.Appointment", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AppointmentDate")
                         .HasColumnType("datetime2");
@@ -47,13 +47,16 @@ namespace AppointmentSchedulerAPI.Migrations
 
                     b.HasIndex("CategoryNo");
 
-                    b.ToTable("Appointments", (string)null);
+                    b.ToTable("Appointments");
                 });
 
             modelBuilder.Entity("AppointmentSchedulerAPI.Models.AppointmentCategory", b =>
                 {
                     b.Property<int>("AppointmentCategoryNo")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AppointmentCategoryNo"));
 
                     b.Property<string>("AppointmentCategoryName")
                         .IsRequired()
@@ -61,7 +64,7 @@ namespace AppointmentSchedulerAPI.Migrations
 
                     b.HasKey("AppointmentCategoryNo");
 
-                    b.ToTable("AppointmentCategeroies", (string)null);
+                    b.ToTable("AppointmentCategeroies");
                 });
 
             modelBuilder.Entity("AppointmentSchedulerAPI.Models.Appointment", b =>

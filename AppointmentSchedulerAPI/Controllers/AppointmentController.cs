@@ -3,6 +3,7 @@ using AppointmentSchedulerAPI.Models;
 using AppointmentSchedulerAPI.Models.Dto;
 using AppointmentSchedulerAPI.Repository.IRepository;
 using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +18,13 @@ namespace AppointmentSchedulerAPI.Controllers
         private readonly IAppointmentRepository _dbAppointment;
         private readonly IMapper _mapper;
         protected APIResponse _response;
-        public AppointmentController(IAppointmentRepository dbAppointment,IMapper mapper)
+        private readonly IAppointmentCategoryRepository _dbAppointmentCategory;
+        public AppointmentController(IAppointmentRepository dbAppointment,IMapper mapper, IAppointmentCategoryRepository dbAppointmentCategory)
         {
-            _dbAppointment= dbAppointment;
+            _dbAppointment = dbAppointment;
             _mapper = mapper;
             this._response = new();
+            _dbAppointmentCategory = dbAppointmentCategory;
         }
 
         [HttpGet]
@@ -88,6 +91,11 @@ namespace AppointmentSchedulerAPI.Controllers
                     ModelState.AddModelError("CustomError", "Appointment already exists !");
                     return BadRequest(ModelState);
                 }
+                if(await _dbAppointmentCategory.GetAsync(u=>u.AppointmentCategoryNo==createDTO.CategoryNo)==null)
+                {
+                    ModelState.AddModelError("CustomError", "AppointmentCategoryNo is invalid");
+                    return BadRequest(ModelState);
+                }
 
 
                 if (createDTO == null)
@@ -117,7 +125,7 @@ namespace AppointmentSchedulerAPI.Controllers
         }
         [HttpDelete("{id:int}", Name = "DeleteAppointment")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<APIResponse>> DeleteAppointment(int id)
         {
@@ -148,7 +156,7 @@ namespace AppointmentSchedulerAPI.Controllers
         }
         [HttpPut("{id:int}", Name = "UpdateAppointment")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
 
         public async Task<ActionResult<APIResponse>> UpdateAppointment(int id,[FromBody]AppointmentUpdateDTO updateDTO)
         {
@@ -156,10 +164,15 @@ namespace AppointmentSchedulerAPI.Controllers
             { 
             if(updateDTO==null || id!=updateDTO.Id)
             {
-                return BadRequest();
+                    return BadRequest();
             }
+                if (await _dbAppointmentCategory.GetAsync(u => u.AppointmentCategoryNo == updateDTO.CategoryNo) == null)
+                {
+                    ModelState.AddModelError("CustomError", "AppointmentCategoryNo is invalid");
+                    return BadRequest(ModelState);
+                }
 
-            Appointment appointment = _mapper.Map<Appointment>(updateDTO);
+                Appointment appointment = _mapper.Map<Appointment>(updateDTO);
             
             await _dbAppointment.UpdateAsync(appointment);
             _response.StatusCode= HttpStatusCode.NoContent;

@@ -100,7 +100,7 @@ namespace AppointmentSchedulerAPI.Controllers
         }
         [HttpDelete("{id:int}",Name ="DeleteAppointmentCategory")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+       
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
 
@@ -124,7 +124,7 @@ namespace AppointmentSchedulerAPI.Controllers
         }
         [HttpPut ("{id:int}",Name ="UpdateAppointmentCategory")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>>UpdateAppointmentCategory(int id,[FromBody] AppointmentCategoryUpdateDTO updateDTO)
         {

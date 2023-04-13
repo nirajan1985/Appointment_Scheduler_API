@@ -9,6 +9,11 @@ namespace AppointmentSchedulerAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
         public int Id { get; set; }
+
+        [ForeignKey("Category")]
+        public int CategoryNo { get; set; } 
+        public AppointmentCategory Category { get; set; }
+        
         public string Title { get; set; }
         public DateTime AppointmentDate { get; set; }
        
